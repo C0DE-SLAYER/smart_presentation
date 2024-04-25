@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
+from slide_control import slide_control
 
 class ImageSelectFrame(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -23,7 +24,7 @@ class ImageSelectFrame(tk.Frame):
             self.submit_button.config(state="normal")
     
     def submit(self):
-        print('clicked')
+        slide_control(self.image_path)
 
 
 class PromptFrame(tk.Frame):
