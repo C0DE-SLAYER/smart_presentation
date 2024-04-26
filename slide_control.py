@@ -1,6 +1,6 @@
 def slide_control(file_path):
 
-    convert_pptx_to_jpg(file_path)
+    # convert_pptx_to_jpg(file_path)
 
     from cvzone.HandTrackingModule import HandDetector
     from cv2 import VideoCapture, flip, imread, resize, line, FILLED, circle, imshow, waitKey, destroyAllWindows
@@ -14,7 +14,7 @@ def slide_control(file_path):
 
     # Camera Setup
     # cap = VideoCapture('http://192.168.0.102:4747/video')
-    cap = VideoCapture(0)
+    cap = VideoCapture(1)
     cap.set(3, width)
     cap.set(4, height)
 
@@ -22,13 +22,10 @@ def slide_control(file_path):
     detectorHand = HandDetector(detectionCon=0.8, maxHands=1)
 
     # Variables
-    imgList = []
     delay = 30
     buttonPressed = False
     counter = 0
-    drawMode = False
     imgNumber = 0
-    delayCounter = 0
     annotations = [[]]
     annotationNumber = -1
     annotationStart = False
@@ -127,31 +124,35 @@ def slide_control(file_path):
             break
 
     destroyAllWindows()
-
+    from shutil import rmtree
+    rmtree('slides')
     return False
 
 
 def convert_pptx_to_jpg(file_path):
-    import convertapi
-    from os import getenv, mkdir, remove
-    from pdf2image import convert_from_path
-    from dotenv import load_dotenv
+    from platform import system
 
-    load_dotenv()
+    output_file = file_path.split('/')[-1]
+    output_file = f"{output_file.split('.')[0]}.pdf"
 
-    convertapi.api_secret = getenv('CONVERTAPI_API_SECRET')
+    if system() == "Linux":
+        from subprocess import run
+        from pdf2image import convert_from_path
+        from os import path, mkdir, remove
 
-    result = convertapi.convert('pdf', {'File': file_path})
-    result.save_files('results.pdf')
+        command = ["libreoffice", "--headless", "--convert-to", "pdf", file_path]
+        run(command)
+        
+        if not path.exists('slides/'):
+            mkdir('slides/')
 
-    try:
-        mkdir('slides')
-    except:
-        print('dir exists')
+        images = convert_from_path(output_file, dpi=200) 
 
-    images = convert_from_path('results.pdf', dpi=200) 
+        for i, image in enumerate(images, start=1):
+            image.save(f'slides/{i}.jpg', "JPEG")  
+        
+        remove(output_file)
 
-    for i, image in enumerate(images, start=1):
-        image.save(f'slides/{i}.jpg', "JPEG")  
-    
-    remove('results.pdf')
+    elif system() == 'Windows':
+        from pptx_tools.utils import save_pptx_as_png # pip install python-pptx-interface
+        save_pptx_as_png('slides/','zee.pptx', overwrite_folder=True)
