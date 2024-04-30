@@ -34,15 +34,26 @@ class PromptFrame(tk.Frame):
         self.prompt_entry = ttk.Entry(self)
         self.prompt_entry.pack(pady=10)
 
+        category_options = ['Select Category for the PPT','Marketing & Sales', 'Education: Lecture', 'Education: Stud Project']
+
+        self.category_value = tk.StringVar()
+        self.category = ttk.Combobox(self, values=category_options, textvariable=self.category_value, state='readonly')
+        self.category.pack(pady=10)
+        self.category.current(0)
+        
         self.submit_button = ttk.Button(self, text="Submit", command=self.submit)
         self.submit_button.pack(pady=10)
 
+        self.prompt_info_label = ttk.Label(self, text="")
+        self.prompt_info_label.pack(pady=10)
+
     def submit(self):
-        prompt_text = self.prompt_entry.get()
-        if prompt_text:
-            # Simulate text processing for 1 second
-            self.after(1000, lambda: print(f"Prompt processing complete: {prompt_text}"))
-            # self.prompt_entry.delete(0, tk.END)  # Clear entry after processing
+
+        if self.prompt_entry.get() and 'Select' not in self.category_value.get():
+            self.prompt_info_label.config(text='Progessing.....')
+        else:
+            self.prompt_info_label.config(text='Fill all the Required Field ...')
+
 
 
 class ModernUI(tk.Tk):

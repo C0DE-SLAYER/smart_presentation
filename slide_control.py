@@ -1,6 +1,6 @@
 def slide_control(file_path):
 
-    # convert_pptx_to_jpg(file_path)
+    convert_pptx_to_jpg(file_path)
 
     from cvzone.HandTrackingModule import HandDetector
     from cv2 import VideoCapture, flip, imread, resize, line, FILLED, circle, imshow, waitKey, destroyAllWindows
