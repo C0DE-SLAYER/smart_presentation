@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 from slide_control import slide_control
+from generate_ppt import generate_ppt
 
 class ImageSelectFrame(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -34,7 +35,7 @@ class PromptFrame(tk.Frame):
         self.prompt_entry = ttk.Entry(self)
         self.prompt_entry.pack(pady=10)
 
-        category_options = ['Select Category for the PPT','Marketing & Sales', 'Education: Lecture', 'Education: Stud Project']
+        category_options = ['Select Category for the PPT', 'lecture', 'stud project']
 
         self.category_value = tk.StringVar()
         self.category = ttk.Combobox(self, values=category_options, textvariable=self.category_value, state='readonly')
@@ -50,7 +51,13 @@ class PromptFrame(tk.Frame):
     def submit(self):
 
         if self.prompt_entry.get() and 'Select' not in self.category_value.get():
-            self.prompt_info_label.config(text='Progessing.....')
+            self.prompt_info_label.config(text='Processing......')
+            self.submit_button.config(state='disabled')
+            self.update_idletasks()
+            ppt = generate_ppt(self.prompt_entry.get(), self.category_value.get())
+            ppt = ppt.select_random_template()
+            self.prompt_info_label.config(text=ppt)
+            self.submit_button.config(state='enabled')
         else:
             self.prompt_info_label.config(text='Fill all the Required Field ...')
 

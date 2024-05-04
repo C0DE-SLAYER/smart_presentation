@@ -1,0 +1,21 @@
+{
+    "stud_project": {
+        "modern": {
+            "topic": "{topic name}",
+            "introduction": "{topic introduction}",
+            "background": "{topic background}",
+            "objectives": "{topic objective in paragraph without any bullet points or markdown formating}",
+            "methodology": ["{topic methodology 1 in bullet points without markdown formating}","{topic methodology 2 in bullet points without markdown formating}","{topic methodology 3 in bullet points without markdown formating}"],
+            "conclusion": "{topic conclusion}"
+        },
+        "minimalist": {
+            "topic": "{topic name}",
+            "introduction": "{topic introduction}",
+            "objectives": "{topic objective in paragraph without any bullet points or markdown formating}",
+            "scope": "{topic scope in paragraph without any bullet points or markdown formating}",
+            "background": "{topic background}",
+            "methodology": "{topic methodology in paragraph without any bullet points or markdown formating}",
+            "benefit": "{topic benefit in paragraph without any bullet points or markdown formating}"
+        }
+    }
+}

@@ -1,15 +1,28 @@
+import json
+import pptx
+import random
+
 class generate_ppt:
 
-    def __init__(self, topic: str) -> None:
-        import pptx
+    def __init__(self, topic: str, category: str) -> None:
         self.topic = topic
-        self.presentation = pptx.Presentation('powerpoints/modern_stud_project.pptx')
-        self.modern_stud_project()
+        self.category = category.replace(' ','_')
+        with open('json_format.json','r') as f:
+            self.json_data = json.load(f)
+
+
+    def select_random_template(self):
+        self.random_category = random.choice(list(self.json_data[self.category].keys()))
+        print(self.random_category)
+        path = getattr(self, f'{self.category}_{self.random_category}')
+        self.presentation = pptx.Presentation(f'templates/{self.category}/{self.random_category}.pptx')
+        return path()
         
     def get_data(self):
         import google.generativeai as genai
         from dotenv import load_dotenv
         import os
+        import json
 
         load_dotenv()
 
@@ -17,50 +30,27 @@ class generate_ppt:
         model = genai.GenerativeModel('gemini-pro')
 
 
-        prompt = f'Fill the below json with the content of topic: "{self.topic}" in plain text avoid markdown for my ppt'
+        prompt = f'Fill the below json with a detailed overview of the topic: "{self.topic}"\n'
 
-        json_format = '''
-        {
-        "slides": [
-        {
-        "topic": f"{self.topic}"
-        },
-        {
-        "title": "Introduction",
-        "content": "{intoduction}"
-        },
-        {
-        "title": "Project Background",
-        "content": "{project background}"
-        },
-        {
-        "title": "project objectives",
-        "content": ["{objective_1_desc}", "{objective_2_desc}", "{objective_3_desc}"]
-        },
-        {
-        "title": "project methodology",
-        "content": ["{methodology_1_desc}","{methodology_2_desc}", "{methodology_3_desc}"]
-        },
-        {
-        "title": "conclusion",
-        "content": "{conclusion}"
-        }
-        ]
-        }
-        '''
+        
+        json_format = json.dumps(self.json_data[self.category][self.random_category])
 
         prompt = prompt + json_format
-        response = model.generate_content(prompt)
 
-        print(f'prompt: {prompt}, response: {response.text}')
+        while True:
+            try: 
+                response = model.generate_content(prompt)
 
-        import json
-        json_response: json = json.loads(response.text)
+                json_response: json = json.loads(response.text)
 
-        with open('slides.json','w') as f:
-            json.dump(json_response, f, indent=4)
+                with open('slides.json','w') as f:
+                    json.dump(json_response, f, indent=4)
+
+                return json_response
+            except: 
+                print('Error Trying again...')
+            
         
-        return json_response
 
 
     def list_text_boxes(self, presentation, slide_num):
@@ -72,8 +62,8 @@ class generate_ppt:
         return text_boxes
 
     def get_text_box_id(self, slide_no):
-        for idx, text in enumerate(self.list_text_boxes('presentation', slide_no), 1):
-            print(f"Text Box {idx}: {text}")
+        for idx, text in enumerate(self.list_text_boxes(self.presentation, slide_no), 1):
+            print(f"slide no. {slide_no}: Text Box {idx}: {text}")
 
 
     def update_text_of_textbox(self, slide, text_box_id, new_text):
@@ -90,20 +80,62 @@ class generate_ppt:
                     return
         raise ValueError(f"Slide {slide} or Text Box ID {text_box_id} not found")
 
-    def modern_stud_project(self):
+    def stud_project_modern(self):
         data = self.get_data()
-        self.update_text_of_textbox(1,2,data['slides'][0]['topic'])
-        self.presentation.save('output/modern_stud_project.pptx')
-        print('ppt saved')
+        self.update_text_of_textbox(1,2,data['topic']) # slide 1
+        
+        self.update_text_of_textbox(2,2,data['introduction']) # slide 2
+        
+        self.update_text_of_textbox(4,2,data['background']) # slide 4
+        
+        self.update_text_of_textbox(6,2,data['objectives']) # slide 6
+
+        self.update_text_of_textbox(8,1,data['methodology'][0]) # slide 8: meth 1
+        self.update_text_of_textbox(8,2,data['methodology'][1]) # slide 8: meth 2
+        self.update_text_of_textbox(8,3,data['methodology'][2]) # slide 8: meth 3
+
+        self.update_text_of_textbox(9,2,data['conclusion']) # slide 9
+
+        file_name = f"{self.topic.replace(' ','_')}.pptx"
+
+        self.presentation.save(file_name)
+
+        return f'PPT saved: {file_name}'
+        
+    def stud_project_minimalist(self):
+        data = self.get_data()
+
+        self.update_text_of_textbox(1, 3,data['topic']) # slide 1
+        
+        self.update_text_of_textbox(3,2,data['introduction']) # slide 3
+        
+        self.update_text_of_textbox(4,3,data['objectives']) # slide 4
+        
+        self.update_text_of_textbox(5,1,data['scope']) # slide 5
+
+        self.update_text_of_textbox(6,3,data['background']) # slide 6
+
+        self.update_text_of_textbox(7,2,data['methodology']) # slide 7
+
+        self.update_text_of_textbox(8,2,data['benefit']) # slide 8
+
+        file_name = f"{self.topic.replace(' ','_')}.pptx"
+
+        self.presentation.save(file_name)
+
+        return f'PPT saved: {file_name}'
 
 
-    # update_text_of_textbox(presentation,2,2,'Introduction of this prject is this this this')
-
-    # presentation.save('output/modern_stud_project.pptx')
-
-
-    # result = get_data('AI chatbot')
-    # print(result)
-    # update_text_of_textbox(presentation,1,2,)
-
-a = generate_ppt('AI Chatbot')
+if __name__ == '__main__':
+    a = generate_ppt('hotal management system', 'stud_project')
+    a.select_random_template()
+    # a.get_text_box_id(1)
+    # a.get_text_box_id(3)
+    # a.get_text_box_id(4)
+    # a.get_text_box_id(5)
+    # a.get_text_box_id(6)
+    # a.get_text_box_id(7)
+    # a.get_text_box_id(8)
+    # a.get_data()
+    # s = a.minimalist_stud_project()
+    # print(s)
