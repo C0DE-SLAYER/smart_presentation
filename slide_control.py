@@ -1,11 +1,18 @@
+from cvzone.HandTrackingModule import HandDetector
+from cv2 import VideoCapture, flip, imread, resize, line, FILLED, circle, imshow, waitKey, destroyAllWindows
+from os import path, listdir
+from numpy import interp
+from shutil import rmtree
+from platform import system
+from subprocess import run
+from pdf2image import convert_from_path
+from os import path, mkdir, remove
+from pptx_tools.utils import save_pptx_as_png
+import os
+
 def slide_control(file_path):
 
     convert_pptx_to_jpg(file_path)
-
-    from cvzone.HandTrackingModule import HandDetector
-    from cv2 import VideoCapture, flip, imread, resize, line, FILLED, circle, imshow, waitKey, destroyAllWindows
-    from os import path, listdir
-    from numpy import interp
 
     # Parameters
     width, height = 640, 480
@@ -13,8 +20,7 @@ def slide_control(file_path):
     folderPath = "slides"
 
     # Camera Setup
-    # cap = VideoCapture('http://192.168.0.102:4747/video')
-    cap = VideoCapture(1)
+    cap = VideoCapture(0)
     cap.set(3, width)
     cap.set(4, height)
 
@@ -124,22 +130,16 @@ def slide_control(file_path):
             break
 
     destroyAllWindows()
-    from shutil import rmtree
+    
     rmtree('slides')
     return False
 
 
 def convert_pptx_to_jpg(file_path):
-    from platform import system
-
     output_file = file_path.split('/')[-1]
     output_file = f"{output_file.split('.')[0]}.pdf"
 
     if system() == "Linux":
-        from subprocess import run
-        from pdf2image import convert_from_path
-        from os import path, mkdir, remove
-
         command = ["libreoffice", "--headless", "--convert-to", "pdf", file_path]
         run(command)
         
@@ -154,5 +154,4 @@ def convert_pptx_to_jpg(file_path):
         remove(output_file)
 
     elif system() == 'Windows':
-        from pptx_tools.utils import save_pptx_as_png # pip install python-pptx-interface
-        save_pptx_as_png('slides/','zee.pptx', overwrite_folder=True)
+        save_pptx_as_png(os.path.join(os.getcwd(), 'slides'), file_path, overwrite_folder=True)
